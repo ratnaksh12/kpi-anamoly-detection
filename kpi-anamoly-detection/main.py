@@ -1,3 +1,14 @@
+import pandas as pd
+from detectors.anomaly_detector import detect_percent_change_anomalies, detect_zscore_anomalies
+from groq import Groq
+import streamlit as st
+from fpdf import FPDF
+import datetime
+
+# Streamlit config
+st.set_page_config(page_title="KPI Anomaly Detection", page_icon="📊", layout="wide")
+
+# Styling for a clean and minimalistic UI
 st.markdown("""
     <style>
         .stApp {
@@ -20,17 +31,15 @@ st.markdown("""
         }
         .filter-header { /* New class for Filter Data */
             color: #0061f2;
-            font-size: 26px; /* Slightly larger for emphasis */
+            font-size: 24px; /* Slightly larger for emphasis */
             font-weight: bold;
-            margin-bottom: 15px; /* Add some space below */
-            padding: 10px;
-            border-bottom: 2px solid #0061f2; /* Add a subtle underline */
+            margin-bottom: 10px; /* Add some space below */
         }
         .alert-header {
             color: #0061f2;
-            font-size: 26px; /* Slightly larger for emphasis */
+            font-size: 24px; /* Slightly larger for emphasis */
             font-weight: bold;
-            margin-bottom: 15px; /* Add some space below */
+            margin-bottom: 10px; /* Add some space below */
             padding: 10px;
             background-color: #e6f0ff; /* Keep the background */
             border-radius: 8px;
@@ -135,7 +144,7 @@ if df is not None and st.checkbox("🔧 Update CSV records"):
 
 # Filter Section
 if df is not None:
-    st.markdown("<h3 class='filter-header'>🔍 Filter Data</h3>", unsafe_allow_html=True) # Changed to h3 and applied new class
+    st.markdown("<h3 class='filter-header'>🔍 Filter Data</h3>", unsafe_allow_html=True) # Applied new class
     kpi_filter = st.multiselect("Select KPIs", df.columns)
     date_range = st.date_input("Date Range", [])
     if kpi_filter:
@@ -155,7 +164,7 @@ if df is not None:
 
     # Display Alerts & Generate Report
     if all_anomalies:
-        st.markdown("<h3 class='alert-header'>🚨 Anomaly Alerts</h3>", unsafe_allow_html=True) # Changed to h3
+        st.markdown("<h3 class='alert-header'>🚨 Anomaly Alerts</h3>", unsafe_allow_html=True) # Applied new class
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
