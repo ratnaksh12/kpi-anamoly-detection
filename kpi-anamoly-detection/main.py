@@ -1,16 +1,9 @@
 import pandas as pd
 from detectors.anomaly_detector import detect_percent_change_anomalies, detect_zscore_anomalies
 from groq import Groq
-import os
-from dotenv import load_dotenv
 import streamlit as st
 from fpdf import FPDF
 import datetime
-
-# Load environment variables
-load_dotenv()
-groq_api_key = os.getenv("GROQ_API_KEY")
-client = Groq(api_key=groq_api_key)
 
 # Streamlit config
 st.set_page_config(page_title="KPI Anomaly Detection", page_icon="📊", layout="wide")
@@ -110,6 +103,10 @@ st.markdown("""
 
 # Add Heading
 st.markdown("<h1 class='stTitle'>KPI Anomaly Detection</h1>", unsafe_allow_html=True)
+
+# Load API key from Streamlit Secrets (for security)
+groq_api_key = st.secrets["GROQ_API_KEY"]
+client = Groq(api_key=groq_api_key)
 
 # Load Data
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"], label_visibility="collapsed")
