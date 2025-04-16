@@ -109,7 +109,7 @@ st.write(st.secrets)  # This will print out all secrets available in your app
 
 # Load API key from Streamlit Secrets (for security)
 groq_api_key = st.secrets["GROQ_API_KEY"]
-client = Groq(api_key=groq_api_key)
+client = Groq(api_key=GROQ_API_KEY)
 
 # Load Data
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"], label_visibility="collapsed")
