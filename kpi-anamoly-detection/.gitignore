@@ -1,0 +1,25 @@
+# Ignore virtual environment
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+
+# Env files
+.env
+
+# Streamlit cache and logs
+.streamlit/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
