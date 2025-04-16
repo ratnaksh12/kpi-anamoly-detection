@@ -104,12 +104,13 @@ st.markdown("""
 # Add Heading
 st.markdown("<h1 class='stTitle'>KPI Anomaly Detection</h1>", unsafe_allow_html=True)
 
-# Debug: Print all available secrets in your Streamlit Cloud app
-st.write(st.secrets)  # This will print out all secrets available in your app
-
 # Load API key from Streamlit Secrets (for security)
-groq_api_key = st.secrets["GROQ_API_KEY"]
-client = Groq(api_key=groq_api_key)
+try:
+    groq_api_key = st.secrets["GROQ_API_KEY"]
+    client = Groq(api_key=groq_api_key)
+except KeyError:
+    st.error("Please ensure you have configured the 'GROQ_API_KEY' in Streamlit Secrets.")
+    st.stop()
 
 # Load Data
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"], label_visibility="collapsed")
@@ -145,8 +146,10 @@ if df is not None:
     if len(date_range) == 2:
         try:
             df = df[(pd.to_datetime(df['date']) >= pd.to_datetime(date_range[0])) & (pd.to_datetime(df['date']) <= pd.to_datetime(date_range[1]))]
-        except:
-            st.warning("Date column not found or invalid format.")
+        except KeyError:
+            st.warning("Date column not found.")
+        except ValueError:
+            st.warning("Invalid date format in the 'date' column.")
 
     # Detect Anomalies
     percent_anomalies = detect_percent_change_anomalies(df)
@@ -174,25 +177,38 @@ if df is not None:
             - Current Value: {anomaly['current']}
             """
 
-            chat_completion = client.chat.completions.create(
-                model="llama3-70b-8192",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.5
-            )
-            summary = chat_completion.choices[0].message.content
+            try:
+                chat_completion = client.chat.completions.create(
+                    model="llama3-70b-8192",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.5
+                )
+                summary = chat_completion.choices[0].message.content
 
-            # Display Alert Header and Body
-            st.markdown(f"""
-                <div class='alert-header'>📢 {anomaly['kpi']} - {anomaly['date']}</div>
-                <div class='alert-body'>{summary}</div>
-            """, unsafe_allow_html=True)
+                # Display Alert Header and Body
+                st.markdown(f"""
+                    <div class='alert-header'>📢 {anomaly['kpi']} - {anomaly['date']}</div>
+                    <div class='alert-body'>{summary}</div>
+                """, unsafe_allow_html=True)
 
-            pdf.multi_cell(0, 10, f"{summary}\n")
+                pdf.multi_cell(0, 10, f"{summary}\n")
+
+            except Exception as e:
+                st.error(f"Error generating summary for anomaly: {e}")
+                st.markdown(f"""
+                    <div class='alert-header'>📢 {anomaly['kpi']} - {anomaly['date']}</div>
+                    <div class='alert-body'>Could not generate detailed summary.</div>
+                """, unsafe_allow_html=True)
+                pdf.multi_cell(0, 10, f"Anomaly in {anomaly['kpi']} on {anomaly['date']}: Could not generate detailed summary.\n")
 
         pdf_output = f"kpi_anomaly_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        pdf.output(pdf_output)
-        with open(pdf_output, "rb") as f:
-            st.download_button("📥 Download Anomaly Report (PDF)", f, file_name=pdf_output)
+        try:
+            pdf.output(pdf_output)
+            with open(pdf_output, "rb") as f:
+                st.download_button("📥 Download Anomaly Report (PDF)", f, file_name=pdf_output)
+        except Exception as e:
+            st.error(f"Error generating or downloading PDF report: {e}")
+
     else:
         st.success("✅ No anomalies detected. All metrics are normal.")
 else:
