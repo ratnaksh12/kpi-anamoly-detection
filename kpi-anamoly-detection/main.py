@@ -105,10 +105,10 @@ st.markdown("""
 st.markdown("<h1 class='stTitle'>KPI Anomaly Detection</h1>", unsafe_allow_html=True)
 
 # Debug: Print all available secrets in your Streamlit Cloud app
-st.write(st.secrets)  # This will print out all secrets available in your app
+st.write(st.Secrets)  # This will print out all secrets available in your app
 
 # Load API key from Streamlit Secrets (for security)
-groq_api_key = st.secrets["GROQ_API_KEY"]
+groq_api_key = st.Secrets["GROQ_API_KEY"]
 client = Groq(api_key=groq_api_key)
 
 # Load Data
